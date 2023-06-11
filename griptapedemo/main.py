@@ -3,6 +3,7 @@ from griptape.ramps import TextStorageRamp, BlobStorageRamp
 from griptape.structures import Pipeline
 from griptape.tasks import ToolkitTask, PromptTask
 from griptape.tools import WebScraper, TextProcessor, FileManager
+from nicegui import ui
 
 # Ramps enable LLMs to store and manipulate data without ever looking at it directly.
 text_storage = TextStorageRamp()
@@ -50,4 +51,5 @@ pipeline.add_tasks(
 
 result = pipeline.run("Load https://griptape.readthedocs.io, summarize it, and store it in griptape.txt")
 
-print(result.output.to_text())
+ui.label(result.output.to_text())
+ui.run()
