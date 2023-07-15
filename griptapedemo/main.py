@@ -1,53 +1,75 @@
-from griptape.memory import Memory
-from griptape.ramps import TextStorageRamp, BlobStorageRamp
-from griptape.structures import Pipeline
-from griptape.tasks import ToolkitTask, PromptTask
-from griptape.tools import WebScraper, TextProcessor, FileManager
+from griptape.engines import VectorQueryEngine
+from griptape.loaders import WebLoader
+from griptape.rules import Ruleset, Rule
+from griptape.structures import Agent
+from griptape.tools import KnowledgeBaseClient
+from griptape.utils import Chat
+import tkinter as tk
+#
+# namespace = "physics-wiki"
+#
+# engine = VectorQueryEngine()
+#
+# artifacts = WebLoader().load(
+#     "https://en.wikipedia.org/wiki/Physics"
+# )
+#
+# engine.vector_store_driver.upsert_text_artifacts(
+#     {namespace: artifacts}
+# )
+# 
+#
+# kb_client = KnowledgeBaseClient(
+#     description="Contains information about physics. "
+#                 "Use it to answer any physics-related questions.",
+#     query_engine=engine,
+#     namespace=namespace
+# )
+#
+# agent = Agent(
+#     rulesets=[
+#         Ruleset(
+#             name="Physics Tutor",
+#             rules=[
+#                 Rule(
+#                     "Always introduce yourself as a physics tutor"
+#                 ),
+#                 Rule(
+#                     "Be truthful. Only discuss physics."
+#                 )
+#             ]
+#         )
+#     ],
+#     tools=[kb_client]
+# )
+#
+# Chat(agent).start()
 
-# Ramps enable LLMs to store and manipulate data without ever looking at it directly.
-text_storage = TextStorageRamp()
-blob_storage = BlobStorageRamp()
 
-# Connect a web scraper to load web pages.
-web_scraper = WebScraper(
-    ramps={
-        "get_content": [text_storage]
-    }
-)
 
-# TextProcessor enables LLMs to summarize and query text.
-text_processor = TextProcessor(
-    ramps={
-        "summarize": [text_storage],
-        "query": [text_storage]
-    }
-)
+def send_message():
+    message = entry.get()  # Get the input from the entry widget
+    output.insert(tk.END, f"You: {message}\n")  # Display the message in the output
 
-# File manager can load and store files locally.
-file_manager = FileManager(
-    ramps={
-        "load": [blob_storage],
-        "save": [text_storage, blob_storage]
-    }
-)
+    # Here, you can process the message or send it to a chatbot or server for further handling
 
-# Pipelines represent sequences of tasks.
-pipeline = Pipeline(
-    memory=Memory()
-)
+    entry.delete(0, tk.END)  # Clear the input field
 
-pipeline.add_tasks(
-    # Load up the first argument from `pipeline.run`.
-    ToolkitTask(
-        "{{ args[0] }}",
-        tools=[web_scraper, text_processor, file_manager]
-    ),
-    # Augment `input` from the previous task.
-    PromptTask(
-        "Say the following in spanish: {{ input }}"
-    )
-)
+# Create the main window
+window = tk.Tk()
+window.title("Chat Window")
 
-result = pipeline.run("Load https://griptape.readthedocs.io, summarize it, and store it in griptape.txt")
+# Create the output text widget
+output = tk.Text(window, height=10, width=50)
+output.pack()
 
-print(result.output.to_text())
+# Create the input entry widget
+entry = tk.Entry(window, width=50)
+entry.pack()
+
+# Create the send button
+send_button = tk.Button(window, text="Send", command=send_message)
+send_button.pack()
+
+# Start the main event loop
+window.mainloop()
